@@ -6,4 +6,5 @@ public interface AppConstants {
 	public static final String DB_URL = "db_url";
 	public static final String DB_USER = "db_user";
 	public static final String DB_PASSWORD = "db_pass";
+	public static final String LOG_FILE = "log_file";
 }

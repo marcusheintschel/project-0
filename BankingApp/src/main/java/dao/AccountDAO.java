@@ -24,6 +24,7 @@ public class AccountDAO {
 	private static final Logger logger = LogManager.getLogger(AccountDAO.class);
 	
 	public void transfer(Customer c) throws Exception {
+		
 		//connect to the database
 		Connection dbaccess = DBUtil.getInstance().getConnection();
 		//initialize hashmap
@@ -54,12 +55,12 @@ public class AccountDAO {
 		switch(transferInput) {
 			//transfer to own account
 			case 1:{
-				transfer1(c,keys,view,balance,userInput,dbaccess);
+				transferToOwnAccount(c,keys,view,balance,userInput,dbaccess);
 				break;
 			}
 			//transfer to another customer's account
 			case 2:{
-				transfer2(c,view,balance,userInput,dbaccess);
+				transferBetweenCustomers(c,view,balance,userInput,dbaccess);
 				break;
 			}
 		}
@@ -117,7 +118,7 @@ public class AccountDAO {
 		
 		List<Account> view = new ArrayList<Account>();
 		
-		PreparedStatement viewAccounts = dbaccess.prepareStatement("select * from bankdb.account where customer_id =?");
+		PreparedStatement viewAccounts = dbaccess.prepareStatement("select * from bankdb.account where customer_id =? order by id");
 		viewAccounts.setInt(1, c.getId());
 		
 		ResultSet accounts = viewAccounts.executeQuery();
@@ -133,6 +134,7 @@ public class AccountDAO {
 		}
 		if(view.isEmpty()) {
 			System.out.println("You do not currently have any accounts with us. Please create an account to view it here.");
+			
 		}
 		
 		
@@ -143,7 +145,7 @@ public class AccountDAO {
 		Connection dbaccess = DBUtil.getInstance().getConnection();
 		
 		System.out.println("Please enter the type of account you would like to make:");
-		String type = scan.next();
+		String type = scan.nextLine();
 		System.out.println("Please enter your starting balance:");
 		double balance = scan.nextDouble();
 		PreparedStatement insert = dbaccess.prepareStatement("insert into bankdb.account (type,balance,customer_id) values (?,?::numeric::money,?);");
@@ -155,6 +157,7 @@ public class AccountDAO {
 		int inserted = insert.executeUpdate();
 		if(inserted == 1) {
 			System.out.println("Your account was successfully created!\n");
+			logger.info(c.getFirst_name() + " " + c.getLast_name() + " created a new " + type + " account.");
 		}
 		
 	}
@@ -175,17 +178,18 @@ public class AccountDAO {
 		int update = depositIntoAccount.executeUpdate();
 		if(update == 1){
 			System.out.println("Deposit Successful!\n");
+			logger.info("Deposit into Account No.: " + view.get(userInput).getId() + " in the amount of $" + deposit);
 		}
-		System.out.println("Old Balance: " + balance + "\n");
-		System.out.println("Deposit Amount: " + deposit + "\n");
-		System.out.println("New Balance: " + amount + "\n");
+		System.out.println("Old Balance: $" + balance + "\n");
+		System.out.println("Deposit Amount: $" + deposit + "\n");
+		System.out.println("New Balance: $" + amount + "\n");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	public void withdraw(Map<Integer,Account> view, int userInput, Connection dbaccess) {
 		
-		System.out.println("How much would you like to withdraw in Account No.: "+ view.get(userInput).getId());
+		System.out.println("How much would you like to withdraw from Account No.: "+ view.get(userInput).getId());
 		double withdrawal = scan.nextDouble();
 		double balance = view.get(userInput).getBalance();
 		double amount = balance - withdrawal;
@@ -199,10 +203,11 @@ public class AccountDAO {
 			
 			if(update == 1){
 				System.out.println("Deposit Successful!\n");
+				logger.info("Withdraw from Account No.: " + view.get(userInput).getId() + " in the amount of " + withdrawal);
 			}
-			System.out.println("Old Balance: " + balance + "\n");
-			System.out.println("Withdrawn Amount: " + withdrawal + "\n");
-			System.out.println("New Balance: " + amount + "\n");
+			System.out.println("Old Balance: $" + balance + "\n");
+			System.out.println("Withdrawn Amount: $" + withdrawal + "\n");
+			System.out.println("New Balance: $" + amount + "\n");
 		
 		}else {
 			System.out.println("You don't have that much money in Account No.:" + view.get(userInput).getId() + "!\n");
@@ -214,7 +219,7 @@ public class AccountDAO {
 		
 	}
 	
-	public void transfer2(Customer c, Map<Integer,Account> view, double balance,int userInput,Connection dbaccess){
+	public void transferBetweenCustomers(Customer c, Map<Integer,Account> view, double balance,int userInput,Connection dbaccess){
 		int custId = 0;
 		try {
 		Map<Integer,Account> view2 = new HashMap<Integer,Account>();
@@ -266,9 +271,12 @@ public class AccountDAO {
 				System.out.println("Transfer successful.\n\nNew Balances:");
 				try {
 					viewAccounts(c);
+					logger.info("Transfer to Customer ID - " + view2.get(transferNo).getCustomerid() +": $" + transfer 
+							+ " from Account No. " + view.get(userInput).getId() 
+							+ " to Account No. " + view2.get(transferNo).getId());
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.warn("Unable to show account view", e);
 				}
 			}
 			
@@ -281,7 +289,7 @@ public class AccountDAO {
 		}
 	}
 	//keys, view, balance, dbaccess, userInput
-	public void transfer1(Customer c, Set<Integer> keys, Map<Integer,Account> view, double balance, int userInput, Connection dbaccess) {
+	public void transferToOwnAccount(Customer c, Set<Integer> keys, Map<Integer,Account> view, double balance, int userInput, Connection dbaccess) {
 		//display accounts
 		System.out.println("Accounts: \n");
 		for(Integer a : keys) {
@@ -309,9 +317,12 @@ public class AccountDAO {
 				System.out.println("Transfer successful.\n\nNew Balances:");
 				try {
 					viewAccounts(c);
+					logger.info("Transfer to own account: $" + transfer 
+								+ " from Account No. " + view.get(userInput).getId() 
+								+ " to Account No. " + view.get(account).getId());
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.warn("Unable to show account view", e);
 				}
 			}
 			
@@ -320,7 +331,7 @@ public class AccountDAO {
 			System.out.println("Balance for Account No.: " + view.get(userInput).getId() + " = $" + view.get(userInput).getBalance() + "\n\n");
 		}
 		}catch (SQLException e) {
-			
+			logger.warn("Could not connect to the database.",e);
 		}
 	}
 }

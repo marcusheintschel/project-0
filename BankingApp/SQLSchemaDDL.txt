@@ -1,0 +1,31 @@
+-- bankdb.customer definition
+
+CREATE TABLE bankdb.customer (
+	id serial NOT NULL,
+	first_name varchar(40) NOT NULL,
+	last_name varchar(40) NOT NULL,
+	email varchar NOT NULL,
+	dob date NULL,
+	username varchar NOT NULL,
+	pass varchar NOT NULL,
+	isapproved bool NOT NULL DEFAULT false,
+	CONSTRAINT customer_pk PRIMARY KEY (id),
+	CONSTRAINT customer_un UNIQUE (username)
+);
+
+-- bankdb.employee definition
+
+CREATE TABLE bankdb.employee (
+	username varchar NOT NULL,
+	pass varchar NOT NULL
+);
+
+-- bankdb.account definition
+
+CREATE TABLE bankdb.account (
+	id serial NOT NULL,
+	"type" varchar NOT NULL,
+	balance numeric(12, 2) NOT NULL,
+	customer_id int4 NOT NULL,
+	CONSTRAINT account_fk FOREIGN KEY (customer_id) REFERENCES bankdb.customer(id)
+);

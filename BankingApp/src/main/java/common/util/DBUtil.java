@@ -22,6 +22,7 @@ public class DBUtil {
 	public static DBUtil getInstance() {
 		if(_instance == null) {
 			_instance = new DBUtil();
+			logger.info("DBUtil instantiated");
 		}
 		return _instance;
 	}
@@ -30,7 +31,7 @@ public class DBUtil {
 		if(this.conn == null) {
 			
 			String configFilePath = System.getProperty(AppConstants.CONFIG_FILE);
-			logger.info("Reading config file in location" + configFilePath);
+			logger.info("Reading config file in location " + configFilePath);
 			
 			try(FileInputStream fis = new FileInputStream(configFilePath)){
 				
@@ -40,6 +41,7 @@ public class DBUtil {
 				this.conn = DriverManager.getConnection(props.getProperty(AppConstants.DB_URL),
 						props.getProperty(AppConstants.DB_USER),
 						props.getProperty(AppConstants.DB_PASSWORD));
+				logger.info("DataBase Connection achieved");
 			}catch (Exception e) {
 				logger.info("Unable to get database connection",e);
 				throw e;

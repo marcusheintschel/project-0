@@ -1,5 +1,7 @@
 package common.pojo;
 
+import java.sql.ResultSet;
+
 public class Customer {
 
 	private int id;
@@ -9,10 +11,10 @@ public class Customer {
 	private String dob;
 	private String username;
 	private String password;
-	
-	
+	private boolean isApproved;
+
 	public Customer(int id, String first_name, String last_name, 
-					String email, String dob, String username, String password) {
+					String email, String dob, String username, String password,boolean isApproved) {
 		super();
 		this.id = id;
 		this.first_name = first_name;
@@ -21,6 +23,18 @@ public class Customer {
 		this.dob = dob;
 		this.username = username;
 		this.password = password;
+		this.isApproved = isApproved;
+	}
+	
+	public Customer(ResultSet rs) throws Exception {
+		this.id = rs.getInt(1);
+		this.first_name = rs.getString(2);
+		this.last_name = rs.getString(3);
+		this.email = rs.getString(4);
+		this.dob = rs.getString(5);
+		this.username = rs.getString(6);
+		this.password = rs.getString(7);
+		this.isApproved = rs.getBoolean(8);
 	}
 
 
@@ -100,5 +114,11 @@ public class Customer {
 		this.password = password;
 	}
 	
-	
+	public boolean isApproved() {
+		return isApproved;
+	}
+
+	public void setApproved(boolean isApproved) {
+		this.isApproved = isApproved;
+	}
 }
