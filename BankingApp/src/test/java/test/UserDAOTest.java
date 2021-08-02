@@ -3,14 +3,14 @@ package test;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Scanner;
-import common.util.*;
+//import common.util.*;
 import org.junit.Test;
 
 import dao.UserDAO;
 
 public class UserDAOTest {
 
+	//@ContextConfiguration(location = AppConstants.CONFIG_FILE)
 	@Test
 	public void testLogin() throws Exception{
 		
