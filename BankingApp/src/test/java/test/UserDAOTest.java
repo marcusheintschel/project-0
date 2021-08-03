@@ -10,6 +10,12 @@ import dao.UserDAO;
 
 public class UserDAOTest {
 
+	/*
+	 * Could not figure out how to simulate Scanner input for testing methods. As all of my methods require Scanner input, I have no tests.
+	 */
+	
+	
+	
 	//@ContextConfiguration(location = AppConstants.CONFIG_FILE)
 	@Test
 	public void testLogin() throws Exception{
